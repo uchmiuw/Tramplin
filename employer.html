@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Кабинет работодателя</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      overflow: hidden;
+      height: 100vh;
+    }
+    
+    .employer-container {
+      display: flex;
+      height: calc(100vh - 64px);
+      position: relative;
+    }
+    
+    .employer-main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      transition: margin-right 0.3s ease;
+    }
+    
+    .sidebar-toggle {
+      position: fixed;
+      top: 84px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #33ab24;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 998;
+      transition: all 0.3s;
+    }
+    
+    .sidebar-toggle:hover {
+      background: #2b8a1f;
+      transform: scale(1.05);
+    }
+    
+    .employer-sidebar {
+      position: fixed;
+      top: 64px;
+      right: -380px;
+      width: 380px;
+      height: calc(100vh - 64px);
+      background: white;
+      box-shadow: -2px 0 20px rgba(0,0,0,0.1);
+      z-index: 999;
+      transition: right 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .employer-sidebar.open {
+      right: 0;
+    }
+    
+    .sidebar-overlay {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 64px);
+      background: rgba(0,0,0,0.5);
+      z-index: 998;
+      display: none;
+    }
+    
+    .sidebar-overlay.active {
+      display: block;
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #1f6aa5, #2b8cd6);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .sidebar-header h3 {
+      margin: 0;
+      color: white;
+      font-size: 18px;
+    }
+    
+    .sidebar-header button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sidebar-tabs {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 8px;
+    }
+    
+    .sidebar-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f8f9fa;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      transition: all 0.2s;
+      width: 100%;
+      text-align: left;
+    }
+    
+    .sidebar-tab-btn:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+    
+    .sidebar-tab-btn.active {
+      background: linear-gradient(135deg, #1f6aa5, #2b8cd6);
+      color: white;
+    }
+    
+    .tab-content {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .form-full {
+      grid-column: span 2;
+    }
+    
+    .employer-main input,
+    .employer-main select,
+    .employer-main textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d0d7de;
+      font-size: 14px;
+    }
+    
+    .employer-main input:focus,
+    .employer-main select:focus,
+    .employer-main textarea:focus {
+      outline: none;
+      border-color: #1f6aa5;
+      box-shadow: 0 0 0 2px rgba(31,106,165,0.1);
+    }
+    
+    .address-block {
+      border: 1px solid #eee;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 10px;
+      background: #fafbfc;
+    }
+    
+    .type-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: #f8f9fa;
+      padding: 8px;
+      border-radius: 12px;
+    }
+    
+    .type-option {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    
+    .type-option:hover {
+      border-color: #1f6aa5;
+    }
+    
+    .type-option.active {
+      background: #1f6aa5;
+      color: white;
+      border-color: #1f6aa5;
+    }
+    
+    .event-fields, .internship-fields, .vacancy-fields {
+      display: none;
+    }
+    
+    .event-fields.show, .internship-fields.show, .vacancy-fields.show {
+      display: block;
+    }
+    
+    .date-time-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .details-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    
+    .details-row select,
+    .details-row input {
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .jobs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .job-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.2s;
+      border-left: 4px solid #1f6aa5;
+    }
+    
+    .job-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .job-card.closed {
+      border-left-color: #dc3545;
+      opacity: 0.8;
+    }
+    
+    .job-card.planned {
+      border-left-color: #ffc107;
+    }
+    
+    .job-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f6aa5;
+      margin: 0 0 8px 0;
+    }
+    
+    .job-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 10px 0;
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .job-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .job-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    
+    .job-actions button {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    
+    .applications-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .application-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.2s;
+    }
+    
+    .application-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    
+    .application-job {
+      font-weight: 600;
+      color: #1f6aa5;
+    }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-accepted { background: #d4edda; color: #155724; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
+    .status-reserved { background: #d1ecf1; color: #0c5460; }
+    
+    .student-info {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+    
+    .application-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .filters-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filters-bar select,
+    .filters-bar input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .filters-bar input {
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+    
+    .stats-grid {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .stat-card {
+      flex: 1;
+      background: linear-gradient(135deg, #f8f9fa, #fff);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #e9ecef;
+      min-width: 100px;
+    }
+    
+    .stat-number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #1f6aa5;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .verification-banner {
+      background: #fff3cd;
+      color: #856404;
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .verification-banner.verified {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .verification-banner.pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .request-verify-btn {
+      background: #ffc107;
+      color: #856404;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .request-verify-btn:hover {
+      background: #e0a800;
+    }
+    
+    .logo-section {
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .logo-section h3 {
+      margin: 0 0 15px 0;
+      color: #1f6aa5;
+      font-size: 16px;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .company-logo {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid #e9ecef;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .company-logo-placeholder {
+      width: 100px;
+      height: 100px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed #ddd;
+      color: #999;
+    }
+    
+    .company-logo-placeholder span {
+      font-size: 32px;
+    }
+    
+    .company-logo-placeholder p {
+      font-size: 11px;
+      margin: 5px 0 0 0;
+    }
+    
+    .logo-upload {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .upload-logo-btn, .remove-logo-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    
+    .upload-logo-btn {
+      background: #1f6aa5;
+      color: white;
+      border: none;
+    }
+    
+    .upload-logo-btn:hover {
+      background: #155a8a;
+    }
+    
+    .remove-logo-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+    }
+    
+    .remove-logo-btn:hover {
+      background: #c82333;
+    }
+    
+    .logo-hint {
+      font-size: 11px;
+      color: #999;
+      margin-top: 8px;
+      width: 100%;
+    }
+    
+    .video-section {
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .video-section h3 {
+      margin: 0 0 15px 0;
+      color: #1f6aa5;
+      font-size: 16px;
+    }
+    
+    .video-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .video-wrapper {
+      position: relative;
+      max-width: 560px;
+      width: 100%;
+    }
+    
+    .video-wrapper iframe {
+      width: 100%;
+      height: 315px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .video-placeholder {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      border: 1px dashed #ddd;
+      color: #999;
+    }
+    
+    .video-placeholder span {
+      font-size: 48px;
+    }
+    
+    .video-placeholder p {
+      margin: 10px 0 0 0;
+      font-size: 14px;
+    }
+    
+    .video-upload {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    
+    .video-url-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    
+    .add-video-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .add-video-btn:hover {
+      background: #218838;
+    }
+    
+    .remove-video-btn {
+      margin-top: 10px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .video-hint {
+      font-size: 11px;
+      color: #999;
+      margin-top: 5px;
+    }
+    
+    .company-stats-section {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .company-stats-section h3 {
+      margin: 0 0 15px 0;
+      color: #1f6aa5;
+      font-size: 18px;
+    }
+    
+    .stats-cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .stat-card-employer {
+      flex: 1;
+      min-width: 150px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid #e9ecef;
+      position: relative;
+      transition: all 0.2s;
+    }
+    
+    .stat-card-employer:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .stat-icon {
+      font-size: 32px;
+    }
+    
+    .stat-content {
+      flex: 1;
+    }
+    
+    .stat-number-employer {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1f6aa5;
+    }
+    
+    .stat-label-employer {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    .edit-stat-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      color: #999;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    
+    .edit-stat-btn:hover {
+      background: #e9ecef;
+      color: #1f6aa5;
+    }
+    
+    @media (max-width: 768px) {
+      .employer-sidebar {
+        width: 100%;
+        right: -100%;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-full {
+        grid-column: span 1;
+      }
+      
+      .stats-grid {
+        flex-direction: column;
+      }
+      
+      .stats-cards {
+        flex-direction: column;
+      }
+      
+      .stat-card-employer {
+        min-width: auto;
+      }
+      
+      .logo-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .video-wrapper iframe {
+        height: 200px;
+      }
+      
+      .video-upload {
+        flex-direction: column;
+      }
+      
+      .video-url-input {
+        width: 100%;
+      }
+      
+      .add-video-btn {
+        width: 100%;
+      }
+      
+      .details-row {
+        flex-direction: column;
+      }
+      
+      .details-row select,
+      .details-row input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Кабинет работодателя</h1>
+  <div style="display:flex; gap:10px;">
+    <button onclick="goHome()">На главную</button>
+    <button onclick="logout()">Выйти</button>
+  </div>
+</header>
+
+<div class="employer-container">
+  <div class="employer-main" id="employerMain">
+    <div id="mainContent"></div>
+  </div>
+</div>
+
+<button class="sidebar-toggle" onclick="toggleSidebar()">
+  ☰
+</button>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="employer-sidebar" id="employerSidebar">
+  <div class="sidebar-header">
+    <h3>Меню управления</h3>
+    <button onclick="toggleSidebar()">✕</button>
+  </div>
+  
+  <div class="sidebar-tabs">
+    <button class="sidebar-tab-btn active" onclick="switchTab('company')">
+      <span>Информация о компании</span>
+    </button>
+    <button class="sidebar-tab-btn" onclick="switchTab('create')">
+      <span>Создать публикацию</span>
+    </button>
+    <button class="sidebar-tab-btn" onclick="switchTab('jobs')">
+      <span>Мои публикации</span>
+    </button>
+    <button class="sidebar-tab-btn" onclick="switchTab('applications')">
+      <span>Отклики</span>
+    </button>
+  </div>
+  
+  <div style="padding: 20px; margin-top: auto; border-top: 1px solid #eee;">
+    <div style="font-size: 12px; color: #999; text-align: center;">
+      <p>Трамплин - карьерная платформа</p>
+      <p>© 2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для верификации -->
+<div id="verificationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 20px; max-width: 450px; width: 90%; max-height: 90vh; overflow-y: auto; padding: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #1f6aa5;">Верификация компании</h2>
+            <button onclick="closeVerificationModal()" style="background: none; border: none; font-size: 28px; cursor: pointer;">&times;</button>
+        </div>
+        
+        <p style="color: #666; margin-bottom: 20px;">Для подтверждения статуса компании укажите корпоративную почту. На неё будет отправлено письмо с подтверждением.</p>
+        
+        <form id="verificationForm">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Корпоративная почта *</label>
+                <input type="email" id="corpEmail" placeholder="name@company.ru" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;" required>
+                <small style="color: #999; display: block; margin-top: 5px;">Почта должна быть на домене вашей компании (например, @company.ru)</small>
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">Отправить заявку на верификацию</button>
+        </form>
+        
+        <p style="font-size: 12px; color: #999; margin-top: 15px; text-align: center;">
+            Куратор проверит указанную почту и подтвердит верификацию. Обычно это занимает 1-2 рабочих дня.
+        </p>
+    </div>
+</div>
+
+<script type="module" src="./employer.js"></script>
+<script type="module" src="./role-check.js"></script>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById("employerSidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+        
+        if (sidebar && overlay) {
+            if (sidebar.classList.contains("open")) {
+                sidebar.classList.remove("open");
+                overlay.classList.remove("active");
+            } else {
+                sidebar.classList.add("open");
+                overlay.classList.add("active");
+            }
+        }
+    }
+    
+    let currentTab = 'company';
+    
+    function switchTab(tabName) {
+        currentTab = tabName;
+        
+        const sidebarBtns = document.querySelectorAll('.sidebar-tab-btn');
+        if (sidebarBtns && sidebarBtns.length > 0) {
+            sidebarBtns.forEach(btn => {
+                if (btn && btn.classList) {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        if (window.event && window.event.target) {
+            const targetBtn = window.event.target.closest('.sidebar-tab-btn');
+            if (targetBtn && targetBtn.classList) {
+                targetBtn.classList.add('active');
+            }
+        }
+        
+        if (window.renderTabContent && typeof window.renderTabContent === 'function') {
+            window.renderTabContent(tabName);
+        }
+    }
+    
+    window.switchToCreateTab = function() {
+        currentTab = 'create';
+        
+        const sidebarBtns = document.querySelectorAll('.sidebar-tab-btn');
+        if (sidebarBtns && sidebarBtns.length > 0) {
+            sidebarBtns.forEach(btn => {
+                if (btn && btn.classList) {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        const createBtn = document.querySelector('.sidebar-tab-btn[onclick*="create"]');
+        if (createBtn && createBtn.classList) {
+            createBtn.classList.add('active');
+        }
+        
+        if (window.renderTabContent && typeof window.renderTabContent === 'function') {
+            window.renderTabContent('create');
+        }
+    };
+    
+    function openVerificationModal() {
+        const modal = document.getElementById('verificationModal');
+        if (modal) modal.style.display = 'flex';
+    }
+    
+    function closeVerificationModal() {
+        const modal = document.getElementById('verificationModal');
+        if (modal) modal.style.display = 'none';
+        const form = document.getElementById('verificationForm');
+        if (form) form.reset();
+    }
+    
+    window.toggleSidebar = toggleSidebar;
+    window.switchTab = switchTab;
+    window.openVerificationModal = openVerificationModal;
+    window.closeVerificationModal = closeVerificationModal;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Просмотр - Трамплин</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    .detail-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .detail-header {
+      background: linear-gradient(135deg, #1f6aa5, #2b8cd6);
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .detail-header h1 {
+      margin: 0 0 10px 0;
+      font-size: 32px;
+      color: white;
+    }
+    
+    .detail-header .company {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    .type-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 12px;
+    }
+    
+    .type-vacancy {
+      background: #28a745;
+      color: white;
+    }
+    
+    .type-internship {
+      background: #ffc107;
+      color: #856404;
+    }
+    
+    .type-event {
+      background: #17a2b8;
+      color: white;
+    }
+    
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      
+    }
+    
+    .info-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .info-icon {
+      font-size: 28px;
+      width: 40px;
+      text-align: center;
+    }
+    
+    .info-text {
+      flex: 1;
+    }
+    
+    .info-text strong {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .info-text span {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .detail-section {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .detail-section h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #1f6aa5;
+      font-size: 20px;
+    }
+    
+    .detail-section p {
+      line-height: 1.6;
+      color: #444;
+    }
+    
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .skill-tag {
+      background: #eef6fb;
+      color: #1f6aa5;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    
+    .detail-map {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .detail-map h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #1f6aa5;
+    }
+    
+    #detail-map {
+      height: 400px;
+      border-radius: 12px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .btn-apply {
+      background: #28a745;
+      font-size: 18px;
+      padding: 15px 30px;
+    }
+    
+    .btn-apply:hover {
+      background: #218838;
+    }
+    
+    .btn-favorite {
+      background: #dc3545;
+      font-size: 18px;
+      padding: 15px 30px;
+    }
+    
+    .btn-favorite:hover {
+      background: #c82333;
+    }
+    
+    .btn-back {
+      background: #6c757d;
+    }
+    
+    .info-row {
+      display: flex;
+      margin-bottom: 12px;
+    }
+    
+    .info-label {
+      width: 140px;
+      font-weight: 600;
+      color: #555;
+    }
+    
+    .info-value {
+      flex: 1;
+      color: #333;
+    }
+    
+    @media (max-width: 768px) {
+      .detail-header {
+        padding: 20px;
+      }
+      
+      .detail-header h1 {
+        font-size: 24px;
+      }
+      
+      .detail-info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .action-buttons button {
+        width: 100%;
+      }
+      
+      .info-row {
+        flex-direction: column;
+      }
+      
+      .info-label {
+        width: auto;
+        margin-bottom: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Просмотр</h1>
+  <div class="auth-buttons">
+    <button onclick="window.location.href='index.html'">На главную</button>
+    <button id="cabinetBtn" onclick="goToCabinet()">Личный кабинет</button>
+    <button onclick="logout()">Выйти</button>
+  </div>
+</header>
+
+<main>
+  <div id="itemContent" class="detail-container">
+    <div class="detail-header">
+      <h1 id="itemTitle">Загрузка...</h1>
+      <div class="company" id="itemCompany"></div>
+      <span id="typeBadge" class="type-badge"></span>
+    </div>
+    
+    <div class="detail-info-grid">
+      <div class="info-card">
+        <div class="info-icon">💰</div>
+        <div class="info-text">
+          <strong>Условия / Стипендия</strong>
+          <span id="itemSalary">—</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🏢</div>
+        <div class="info-text">
+          <strong>Формат</strong>
+          <span id="itemFormat">—</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">📍</div>
+        <div class="info-text">
+          <strong>Адрес</strong>
+          <span id="itemAddress">—</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">📅</div>
+        <div class="info-text">
+          <strong>Дата добавления</strong>
+          <span id="itemDate">—</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">📌</div>
+        <div class="info-text">
+          <strong>Срок действия</strong>
+          <span id="itemEndDate">—</span>
+        </div>
+      </div>
+      <div class="info-card">
+    <div class="info-icon">⏱️</div>
+    <div class="info-text">
+        <strong>Занятость</strong>
+        <span id="itemWorkHours">—</span>
+    </div>
+</div>
+<div class="info-card">
+    <div class="info-icon">📊</div>
+    <div class="info-text">
+        <strong>Уровень</strong>
+        <span id="itemLevel">—</span>
+    </div>
+</div>
+    </div>
+    
+    <div id="specialFields" class="detail-section" style="display: none;">
+      <h2>Дополнительная информация</h2>
+      <div id="specialContent"></div>
+    </div>
+    
+    <div class="detail-section">
+      <h2>Описание</h2>
+      <p id="itemDescription">Загрузка...</p>
+    </div>
+    
+    <div class="detail-section">
+      <h2>Необходимые навыки</h2>
+      <div id="itemSkills" class="skills-list"></div>
+    </div>
+    
+    <div class="detail-map">
+      <h2>Расположение на карте</h2>
+      <div id="detail-map"></div>
+    </div>
+    
+    <div class="action-buttons">
+      <button id="applyBtn" class="btn-apply" onclick="applyForItem()">Откликнуться</button>
+      <button id="favoriteBtn" class="btn-favorite" onclick="toggleFavorite()">В избранное</button>
+      <button class="btn-back" onclick="window.location.href='index.html'">Назад</button>
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module" src="./item-detail.js"></script>
+
+</body>
+</html>

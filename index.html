@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Трамплин</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    .type-selector {
+      display: flex;
+      gap: 5px;
+      background: #f1f3f5;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    
+    .type-btn {
+      flex: 1;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: transparent;
+      color: #495057;
+      font-weight: 500;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    
+    .type-btn:hover {
+      background: rgba(31,106,165,0.1);
+    }
+    
+    .type-btn.active {
+      background: #1f6aa5;
+      color: white;
+    }
+    
+    .list-container {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .list-container h2 {
+      display: none;
+    }
+
+    /* Новая структура фильтров - все в одну строку */
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .search-group {
+      flex: 2;
+      min-width: 200px;
+    }
+    
+    .search-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+    }
+    
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filter-group select {
+      padding: 10px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      min-width: 130px;
+    }
+    
+    .tag-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .tag-filters select {
+      padding: 10px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      min-width: 140px;
+    }
+    
+    .search-btn {
+      background: #1f6aa5;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .search-btn:hover {
+      background: #155a8a;
+    }
+
+    @media (max-width: 992px) {
+      .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-group {
+        width: 100%;
+      }
+      
+      .filter-group {
+        justify-content: space-between;
+      }
+      
+      .tag-filters {
+        width: 100%;
+      }
+      
+      .tag-filters select {
+        flex: 1;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .filter-group {
+        flex-direction: column;
+      }
+      
+      .filter-group select {
+        width: 100%;
+      }
+      
+      .tag-filters {
+        flex-direction: column;
+      }
+      
+      .tag-filters select {
+        width: 100%;
+      }
+      
+      .search-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="home-page">
+
+<header class="header">
+  <h1>Трамплин</h1>
+  <div class="auth-buttons">
+    <button onclick="window.location.href='login.html'">Войти</button>
+    <button class="primary" onclick="window.location.href='register.html'">Регистрация</button>
+  </div>
+</header>
+
+<!-- Новая структура фильтров в одну строку -->
+<div class="filters-row">
+  <div class="search-group">
+    <input type="text" id="searchInput" placeholder="Поиск по названию, описанию или городу">
+  </div>
+  
+  <div class="filter-group">
+    <select id="salaryFilter">
+      <option value="">Зарплата</option>
+      <option value="low">До 50 000 ₽</option>
+      <option value="mid">50 000 – 150 000 ₽</option>
+      <option value="high">от 150 000 ₽</option>
+    </select>
+    
+    <select id="formatFilter">
+      <option value="">Формат работы</option>
+      <option value="remote">Удалённая</option>
+      <option value="office">В офисе</option>
+      <option value="hybrid">Гибрид</option>
+    </select>
+    
+    <select id="sortFilter">
+      <option value="newest">Сначала новые</option>
+      <option value="oldest">Сначала старые</option>
+    </select>
+  </div>
+  
+  <div class="tag-filters">
+    <select id="techTagFilter">
+      <option value="">Любые навыки</option>
+    </select>
+    <select id="levelTagFilter">
+      <option value="">Любой уровень</option>
+    </select>
+    <select id="employmentTagFilter">
+      <option value="">Часы работы</option>
+    </select>
+  </div>
+  
+  <button class="search-btn" onclick="applyFilters()">Поиск</button>
+</div>
+
+<main class="main-layout">
+  <div class="map-container">
+    <div id="map"></div>
+  </div>
+  <div class="list-container">
+    <div class="type-selector">
+      <button id="typeVacancy" class="type-btn active" onclick="switchType('vacancy')">Вакансии</button>
+      <button id="typeInternship" class="type-btn" onclick="switchType('internship')">Стажировки</button>
+      <button id="typeEvent" class="type-btn" onclick="switchType('event')">Мероприятия</button>
+    </div>
+    <div id="list"></div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module" src="./firebase.js"></script>
+<script type="module" src="./app.js"></script>
+
+</body>
+</html>
